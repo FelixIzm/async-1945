@@ -1,8 +1,12 @@
-﻿import requests
+import requests
 import json
 import aiohttp
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 cookies = {}
+
+
 
 
 def parse_file (name_file):
@@ -18,27 +22,15 @@ def parse_file (name_file):
 headers_img = parse_file('./img_info_header.txt')
 
 def get_info(info_url,cookies):
+    
     cookies['showimage']='0'
     #info_url = 'https://obd-memorial.ru/html/info.htm?id='+str(id)
     res3 = requests.get(info_url,cookies=cookies)
-    print(res3.status_code)
-######################################
+    if(res3.status_code == 503):
+        print(res3.status_code)
+    return res3.text
 
-async def get(url, cookies, headers):
-    headers['Referer'] = 'https://obd-memorial.ru/html/info.htm?id='.format(id)
-    #url = 'https://obd-memorial.ru/html/info.htm?id='.format(id)
-    async with aiohttp.ClientSession(cookies=cookies, headers=headers) as session:
-        async with session.get(url) as resp:
-            #assert resp.status == 200
-            return resp
-######################################
 
-async def fetch(client):
-    async with client.get('http://python.org') as resp:
-        assert resp.status == 200
-        return await resp.text()
-
-#####################################
 def make_str_cookie(cookies):
     str_cook = ''
     for key, value in cookies.items():
@@ -53,8 +45,6 @@ def work(image_id):
     res1 = requests.get(info_url)
 
     if(res1.status_code==307):
-        print(res1.status_code)
-        print('*****************')
         cookies = {}
         cookies['3fbe47cd30daea60fc16041479413da2']=res1.cookies['3fbe47cd30daea60fc16041479413da2']
         cookies['JSESSIONID']=res1.cookies['JSESSIONID']
@@ -76,27 +66,36 @@ def work(image_id):
                 url_list.append(info_url)
     return url_list
 ####################################################
+async def get_data_asynchronous():
+    global cookies
+    #url_list = work(51480906) # 2
+    #url_list = work(89600091) # 4
+
+    url_list = work(85942988)
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        with requests.Session() as session:
+            # Set any session parameters here before calling `fetch`
+
+            # Initialize the event loop        
+            loop = asyncio.get_event_loop()
+            
+            tasks = [
+                loop.run_in_executor(
+                    executor,
+                    get_info,
+                    *(url,cookies) # Allows us to pass in multiple arguments to `fetch`
+                )
+                for url in url_list
+            ]
+            
+            # Initializes the tasks to run and awaits their results
+            for response in await asyncio.gather(*tasks):
+                pass
 
 
-#url_list = work(51480906) # 2
-#url_list = work(89600091) # 4
+def main():
+    loop = asyncio.get_event_loop()
+    future = asyncio.ensure_future(get_data_asynchronous())
+    loop.run_until_complete(future)
 
-url_list = work(85942988)
-'''
-for url in url_list:
-    get_info(url,cookies)
-exit(1)
-'''
-
-loop = asyncio.get_event_loop()
-headers_img['cookies'] = make_str_cookie(cookies)
-coroutines = [get(url, cookies, headers_img) for url in url_list]
-
-results = loop.run_until_complete(asyncio.gather(*coroutines))
-
-print(len(results))
-
-for res in results:
-    print(res.status)
-
-#print(results.status)
+main()
