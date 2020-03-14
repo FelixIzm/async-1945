@@ -17,13 +17,21 @@ def parse_file (name_file):
     return dict_
 headers_img = parse_file('./img_info_header.txt')
 
-async def get(id, cookies, headers):
+def get_info(info_url,cookies):
+    cookies['showimage']='0'
+    #info_url = 'https://obd-memorial.ru/html/info.htm?id='+str(id)
+    res3 = requests.get(info_url,cookies=cookies)
+    print(res3.status_code)
+######################################
+
+async def get(url, cookies, headers):
     headers['Referer'] = 'https://obd-memorial.ru/html/info.htm?id='.format(id)
-    url = 'https://obd-memorial.ru/html/info.htm?id='.format(id)
+    #url = 'https://obd-memorial.ru/html/info.htm?id='.format(id)
     async with aiohttp.ClientSession(cookies=cookies, headers=headers) as session:
         async with session.get(url) as resp:
             #assert resp.status == 200
             return resp
+######################################
 
 async def fetch(client):
     async with client.get('http://python.org') as resp:
@@ -62,15 +70,21 @@ def work(image_id):
         for item in response_dict:
             #print(i, item['id'])
             for id in item['mapData'].keys():
-                #info_url = 'https://obd-memorial.ru/html/info.htm?id='+str(id)
-                info_url = str(id)
+                info_url = 'https://obd-memorial.ru/html/info.htm?id='+str(id)
+                #info_url = str(id)
                 #print('\t',info_url)
                 url_list.append(info_url)
     return url_list
 ####################################################
 
 
-url_list = work(84042290)
+#url_list = work(51480906) # 2
+url_list = work(89600091) # 4
+
+for url in url_list:
+    get_info(url,cookies)
+exit(1)
+
 loop = asyncio.get_event_loop()
 headers_img['cookies'] = make_str_cookie(cookies)
 coroutines = [get(url, cookies, headers_img) for url in url_list]
