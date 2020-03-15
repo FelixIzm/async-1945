@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 import ssl
 import aiohttp
 
+file = open('urls.txt','w') 
 
 cookies = {}
 
@@ -33,7 +34,8 @@ def fetch(session, url,cookies):
         # `fetch` function itself
         return data
 ####################################################
-def get_info(info_url,cookies):
+def get_info(info_url):
+    global cookies
     cookies['showimage']='0'
     #info_url = 'https://obd-memorial.ru/html/info.htm?id='+str(id)
     res3 = requests.get(info_url,cookies=cookies)
@@ -74,6 +76,8 @@ def work(image_id):
                 #info_url = str(id)
                 #print('\t',info_url)
                 url_list.append(info_url)
+                print(info_url, file=file)
+    file.close()
     return url_list
 ####################################################
 async def get_data_asynchronous():
@@ -81,25 +85,11 @@ async def get_data_asynchronous():
     #url_list = work(51480906) # 2
     #url_list = work(89600091) # 4
     url_list = work(85942988)
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        with requests.Session() as session:
-            # Set any session parameters here before calling `fetch`
-
-            # Initialize the event loop        
-            loop = asyncio.get_event_loop()
-            
-            tasks = [
-                loop.run_in_executor(
-                    executor,
-                    get_info,*(url,cookies) # Allows us to pass in multiple arguments to `fetch`
-                    #fetch,*(session,url,cookies) # Allows us to pass in multiple arguments to `fetch`
-                )
-                for url in url_list
-            ]
-            
-            # Initializes the tasks to run and awaits their results
-            for response in await asyncio.gather(*tasks):
-                pass
+    with ThreadPoolExecutor(max_workers=2) as executor:
+   # распределяем 1000 URL-адресов по четырем потокам в пуле 
+   # _ - это тело каждой страницы, которую я сейчас игнорирую 
+        for _ in executor.map(get_info, url_list):
+            pass
 
 
 def main():
