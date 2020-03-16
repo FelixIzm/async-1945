@@ -2,7 +2,6 @@ from concurrent.futures import ThreadPoolExecutor as PoolExecutor
 import requests
 #from requests.exceptions import Timeout, HTTPError
 import json
-import random
 import time
 import threading
 
