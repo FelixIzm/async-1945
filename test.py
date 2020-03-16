@@ -17,9 +17,7 @@ def parse_file (name_file):
     return dict_
 headers_img = parse_file('./img_info_header.txt')
 
-async def get(id, cookies, headers):
-    headers['Referer'] = 'https://obd-memorial.ru/html/info.htm?id='.format(id)
-    url = 'https://obd-memorial.ru/html/info.htm?id='.format(id)
+async def get(url, cookies, headers):
     async with aiohttp.ClientSession(cookies=cookies, headers=headers) as session:
         async with session.get(url) as resp:
             #assert resp.status == 200
@@ -29,7 +27,6 @@ async def fetch(client):
     async with client.get('http://python.org') as resp:
         assert resp.status == 200
         return await resp.text()
-
 #####################################
 def make_str_cookie(cookies):
     str_cook = ''
@@ -62,8 +59,7 @@ def work(image_id):
         for item in response_dict:
             #print(i, item['id'])
             for id in item['mapData'].keys():
-                #info_url = 'https://obd-memorial.ru/html/info.htm?id='+str(id)
-                info_url = str(id)
+                info_url = 'https://obd-memorial.ru/html/info.htm?id='+str(id)
                 #print('\t',info_url)
                 url_list.append(info_url)
     return url_list
