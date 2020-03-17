@@ -131,6 +131,9 @@ def get_images(item):
             try:
                 media = MediaFileUpload(dirpath+"/"+str(item['id'])+'.jpg', chunksize=-1, mimetype = 'image/jpg')
                 r = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                print('r')
+                pass
+                return
                 #threading.Event().wait(1)
             except HttpError as e:
                 print('ERROR *************************')
@@ -156,7 +159,7 @@ print('info count = ',len(list_infocards))
 #get_images(list_images, cookies)
 #print(list_images)
 ###################################
-with PoolExecutor(max_workers=8) as executor:
+with PoolExecutor(max_workers=1) as executor:
    for _ in executor.map(get_images, list_images):
        pass
 
