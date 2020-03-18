@@ -108,5 +108,5 @@ for url in list_infocards:
         cell.value = cell_value
 #################################3
 
-workbook.save(filename =  path2save+"/"+str(image_id)+'_book.xsls')
+workbook.save(filename =  path2save+"/"+str(image_id)+'_book.xlsx')
 print('done')
