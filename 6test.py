@@ -120,42 +120,15 @@ def get_images(list_item_images):
             headers_img = parse_file(BASE_DIR+'/header_img.txt')
             headers_img['Referer'] = info_url
             #####################
+            print(item['id'])
             req_img = requests.get("https://cdn.obd-memorial.ru/html/images3",headers=headers_img,params=params,cookies=cookies,stream = True,allow_redirects = False )
             #####################
             if(req_img.status_code==200):
-                print('200')
+                #print('200')
                 location = os.path.abspath(dirpath+"/"+str(item['id'])+'.jpg')
                 f = open(location, 'wb')
                 f.write(req_img.content)
                 f.close()
-
-                name = str(item['id'])+'.jpg'
-                file_metadata = {'name': name,'parents': [id_folder_save]}
-
-                try:
-                    media = MediaFileUpload(dirpath+"/"+str(item['id'])+'.jpg', chunksize=-1, mimetype = 'image/jpg')
-                    r = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                    print('r')
-                    pass
-                    return
-                    #threading.Event().wait(1)
-                except HttpError as e:
-                    print('ERROR *************************')
-                    print(e)
-                    if e.resp.status in [404]:
-                        # Start the upload all over again.
-                        print("ERROR404 ********")
-                    elif e.resp.status in [500, 502, 503, 504]:
-                        print("ERROR 50* ********")
-                        # Call next_chunk() again, but use an exponential backoff for repeated errors.
-                    else:
-                        print('OK')
-                    # Do not retry. Log the error and fail.
-                    print('ERROR *************************')
-            pass
-
-
-
 
 list_images, list_infocards, cookies = get_lists(image_id)
 print('img count = ',len(list_images))
